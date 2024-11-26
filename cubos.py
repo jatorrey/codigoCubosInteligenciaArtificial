@@ -53,10 +53,6 @@ estado_final = {
 
 plan = mover_cubos_a_estado_final(estado_inicial, estado_final)
 
-print("Estado inicial:")
-for cubo, posicion in estado_inicial.items():
-    print(f"{cubo} está en {posicion}")
-
 print("\nPlan de movimientos:")
 for movimiento in plan:
     if movimiento[1] == 'mesa':
@@ -66,4 +62,7 @@ for movimiento in plan:
 
 print("\nEstado final:")
 for cubo, posicion in estado_final.items():
-    print(f"{cubo} está en {posicion}")
+    if posicion == 'mesa':
+        print(f"{cubo} | --- | mesa")
+    else:
+        print(f"{cubo} | --- | {posicion}")
