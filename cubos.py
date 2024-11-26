@@ -1,78 +1,69 @@
-from collections import deque
+def mover_cubos_a_mesa(estado_inicial):
+    # Mover todos los cubos a la mesa
+    estado_actual = estado_inicial
+    plan = []
+    while any(estado_actual[cubo] != 'mesa' for cubo in ['A', 'B', 'C']):
+        for cubo in ['C', 'A', 'B']:
+            if estado_actual[cubo] != 'mesa' and not any(estado_actual[c] == cubo for c in ['A', 'B', 'C']):
+                # Mover el cubo a la mesa si no tiene otro cubo encima
+                estado_actual[cubo] = 'mesa'
+                plan.append((cubo, 'mesa'))
+                break
+            else:
+                # Buscar un cubo que esté encima de otro cubo y moverlo
+                for c in ['A', 'B', 'C']:
+                    if estado_actual[c] == cubo:
+                        # Mover el cubo que está encima a la mesa
+                        estado_actual[c] = 'mesa'
+                        plan.append((c, 'mesa'))
+                        break
+    return estado_actual, plan
 
-# Definimos los cubos y las posiciones iniciales.
-cubos = ['A', 'B', 'C']
-# Definimos una estructura de estado, donde cada cubo puede estar en otro cubo o en la mesa.
+def mover_cubos_a_estado_final(estado_inicial, estado_final):
+    # Mover todos los cubos a la mesa
+    estado_mesa, plan_mesa = mover_cubos_a_mesa(estado_inicial)
+    
+    # Hacer los movimientos necesarios para llegar al estado final
+    estado_actual = estado_mesa
+    plan = plan_mesa
+    while estado_actual != estado_final:
+        for cubo in ['C', 'A', 'B']:
+            if estado_actual[cubo] != estado_final[cubo]:
+                # Mover el cubo al lugar correcto
+                if estado_final[cubo] == 'mesa':
+                    estado_actual[cubo] = 'mesa'
+                    plan.append((cubo, 'mesa'))
+                else:
+                    estado_actual[cubo] = estado_final[cubo]
+                    plan.append((cubo, estado_final[cubo]))
+                break
+    return plan
+
 estado_inicial = {
-    'A': 'B',  # A está sobre B
-    'B': 'C',  # B está sobre C
-    'C': 'mesa'  # C está en la mesa
+    'C': 'A',
+    'A': 'B',
+    'B': 'mesa'
 }
 
-# Función para mover un cubo
-def mover_cubo(estado, cubo, destino):
-    nuevo_estado = estado.copy()
-    nuevo_estado[cubo] = destino
-    return nuevo_estado
-
-# Función para generar movimientos válidos
-def movimientos_validos(estado):
-    movimientos = []
-    for cubo in cubos:
-        # Si el cubo está en la mesa, podemos moverlo a cualquier otro cubo
-        if estado[cubo] == 'mesa':
-            for otro_cubo in cubos:
-                if otro_cubo != cubo and estado[otro_cubo] == 'mesa':
-                    movimientos.append((cubo, otro_cubo))
-        else:
-            # Si el cubo está sobre otro cubo, podemos moverlo a la mesa
-            movimientos.append((cubo, 'mesa'))
-    return movimientos
-
-# Función para imprimir el plan de movimientos
-def imprimir_plan(plan):
-    print("Plan de movimientos:")
-    for mov in plan:
-        print(f"Mover {mov[0]} a {mov[1]}")
-
-# Función de búsqueda en profundidad
-def resolver_cubos(estado_inicial, estado_final):
-    stack = deque([(estado_inicial, [])])  # pila de búsqueda con estado y plan
-    visitados = set()
-    
-    while stack:
-        estado_actual, plan = stack.pop()
-        estado_tupla = tuple(sorted(estado_actual.items()))  # convertir estado en tupla para verificación
-        
-        if estado_tupla in visitados:
-            continue
-        
-        visitados.add(estado_tupla)
-        
-        # Verificamos si hemos llegado al estado final
-        if estado_actual == estado_final:
-            return plan
-        
-        # Generar movimientos y actualizar el plan
-        for cubo, destino in movimientos_validos(estado_actual):
-            nuevo_estado = mover_cubo(estado_actual, cubo, destino)
-            nuevo_plan = plan + [(cubo, destino)]
-            stack.append((nuevo_estado, nuevo_plan))
-    
-    return None
-
-# Definir el estado final deseado
 estado_final = {
-    'A': 'mesa',
-    'B': 'mesa',
+    'A': 'B',
+    'B': 'C',
     'C': 'mesa'
 }
 
-# Ejecutar el algoritmo para resolver el problema
-plan_solucion = resolver_cubos(estado_inicial, estado_final)
+plan = mover_cubos_a_estado_final(estado_inicial, estado_final)
 
-# Imprimir el plan si se encontró una solución
-if plan_solucion:
-    imprimir_plan(plan_solucion)
-else:
-    print("No se encontró una solución.")
+print("Estado inicial:")
+for cubo, posicion in estado_inicial.items():
+    print(f"{cubo} está en {posicion}")
+
+print("\nPlan de movimientos:")
+for movimiento in plan:
+    if movimiento[1] == 'mesa':
+        print(f"Mover {movimiento[0]} a la mesa")
+    else:
+        print(f"Mover {movimiento[0]} a {movimiento[1]}")
+
+print("\nEstado final:")
+for cubo, posicion in estado_final.items():
+    print(f"{cubo} está en {posicion}")
